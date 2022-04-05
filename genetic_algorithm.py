@@ -1,19 +1,11 @@
 import pandas as pd
 import numpy as np
-
-
-class Chromosome:
-
-    def __init__(self):
-        pass
-
-    def score_chromosome(self):
-        pass
+import random
 
 
 class GeneticAlgorithm:
     # Constructor:
-    #   - File: an int corresponding to the file number in the 'data' folder (1-40)
+    #   - File: int corresponding to the file number in the 'data' folder (1-40)
     #   - Selection: string either 'Rank', 'Tournament', or 'Roulette'
     #   - Crossover: string for crossover method ...
     #   - Mutation: string for mutation method ...
@@ -24,12 +16,14 @@ class GeneticAlgorithm:
         with open(f'data\\pmed{file}.txt', 'r') as file:
             data_string = file.read().split('\n')
             data_info = data_string[0].lstrip().rstrip().split(' ')
-            self.data = [data_string[i].lstrip().rstrip().split(' ') for i in range(1, len(data_string))]
+            data = [data_string[i].lstrip().rstrip().split(' ') for i in range(1, len(data_string))]
 
         # Initialize parameter variables
         self.num_vertices = int(data_info[0])
+        self.vertices = list(range(self.num_vertices))
         self.num_edges = int(data_info[1])
         self.p = int(data_info[2])
+
         self.selection_mech = selection
         self.crossover_method = crossover
         self.mutation_method = mutation
@@ -37,7 +31,10 @@ class GeneticAlgorithm:
 
         # Initialize chromosome
         self.chromosome = np.zeros(shape=(self.num_vertices, 1))
-        print()
+        initial_vertices = random.sample(self.vertices, self.p)
+        for idx, val in enumerate(self.chromosome):
+            if idx in initial_vertices:
+                self.chromosome[idx] = 1
 
 
 if __name__ == "__main__":
