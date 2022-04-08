@@ -34,11 +34,19 @@ class GeneticAlgorithm:
         for i in range(self.num_vertices):
             for j in range(self.num_vertices):
                 if i != j:
-                    init_matrix[i, j] = -1
+                    init_matrix[i, j] = 99999
         self.cost_matrix = pd.DataFrame(init_matrix, index=list(range(1,self.num_vertices+1)), columns=list(range(1,self.num_vertices+1)))
         for line in data:
             self.cost_matrix.loc[int(line[0])][int(line[1])] = int(line[2])
             self.cost_matrix.loc[int(line[1])][int(line[0])] = int(line[2])
+
+        # Apply Floyd's algorithm to cost matrix
+        for k in range(1, self.num_vertices+1):
+            for i in range(1, self.num_vertices+1):
+                for j in range(1, self.num_vertices+1):
+                    self.cost_matrix.loc[i][j] = min(self.cost_matrix.loc[i][j], self.cost_matrix.loc[i][k]+self.cost_matrix.loc[k][j])
+            print(k)
+        print()
 
         # Initialize chromosome
         self.chromosome = pd.DataFrame(np.zeros(shape=(100, self.num_vertices)), columns=list(range(1,self.num_vertices+1)))
