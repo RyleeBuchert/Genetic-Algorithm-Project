@@ -6,14 +6,14 @@ import time
 
 class GeneticAlgorithm:
     # Constructor:
-    #   - File: int corresponding to the file number in the 'data' folder (1-40)
+    #   - File: int for file number in the 'data\\raw' folder (1-40)
     #   - Selection: string either 'Rank', 'Tournament', or 'Roulette'
     #   - Crossover: string for crossover method ...
     #   - Mutation: string for mutation method ...
     #   - Mutation Rate: float for the mutation rate
-    def __init__(self, file, selection, crossover, mutation, mutation_rate):
+    def __init__(self, file_num, selection, crossover, mutation, mutation_rate):
         # Load test data and store info
-        with open(f'data\\pmed{file}.txt', 'r') as file:
+        with open(f'data\\raw\\pmed{file_num}.txt', 'r') as file:
             data_string = file.read().split('\n')
             data_info = data_string[0].lstrip().rstrip().split(' ')
             data = [data_string[i].lstrip().rstrip().split(' ') for i in range(1, len(data_string))]
@@ -46,7 +46,7 @@ class GeneticAlgorithm:
                 for j in range(1, self.num_vertices+1):
                     self.cost_matrix.loc[i][j] = min(self.cost_matrix.loc[i][j], self.cost_matrix.loc[i][k]+self.cost_matrix.loc[k][j])
             print(k)
-        print()
+        self.cost_matrix.to_csv(f'data\\pmed{file_num}.csv')
 
         # Initialize chromosome
         self.chromosome = pd.DataFrame(np.zeros(shape=(100, self.num_vertices)), columns=list(range(1,self.num_vertices+1)))
@@ -75,5 +75,5 @@ class GeneticAlgorithm:
 
 if __name__ == "__main__":
 
-    GA = GeneticAlgorithm(1, 'Tournament', 'MX1', 'Single-Point', 0.05)
-    GA.start()
+    GA = GeneticAlgorithm(2, 'Tournament', 'MX1', 'Single-Point', 0.05)
+    # GA.start()
