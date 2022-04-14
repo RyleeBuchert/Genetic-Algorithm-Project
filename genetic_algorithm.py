@@ -75,5 +75,8 @@ class GeneticAlgorithm:
 
 if __name__ == "__main__":
 
-    GA = GeneticAlgorithm(2, 'Tournament', 'MX1', 'Single-Point', 0.05)
+    # GA = GeneticAlgorithm(2, 'Tournament', 'MX1', 'Single-Point', 0.05)
     # GA.start()
+
+    for i in range(50):
+        print(random.randint(0,10))

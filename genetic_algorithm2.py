@@ -4,31 +4,13 @@ import random
 import time
 
 
-# Method to open file and get data
-#   - Returns dictionary of p, num_vertices, and coordinates
-def open_file(file_path):
-    with open(file_path, 'r') as file:
-        data_string = file.read().split('\n')
-
-    data_info = data_string[0].split(' ')
-    p = int(data_info[0])
-    num_vertices = int(data_info[1])
-
-    raw_data = [data_string[i].split(',') for i in range(1, len(data_string))]
-    data = [(float(item[0]), float(item[1])) for item in raw_data if item[0] != '']
-    # centroids = [data[i] for i in range(p)]
-    # data = data[p:]
-    return {'p': p, 'num_vertices': num_vertices, 'data': data}
-
-
 class GeneticAlgorithm:
     # Constructor:
     #   - File: file object from 'open_file' method
     #   - Selection: string either 'Rank', 'Tournament', or 'Roulette'
-    #   - Crossover: string for crossover method ...
-    #   - Mutation: string for mutation method ...
-    #   - Mutation Rate: float for the mutation rate
-    def __init__(self, data_dict, selection, crossover, mutation, mutation_rate):
+    #   - Crossover: string either 'Single Point', 'Double Point, 'N-Point', or 'Uniform'
+    #   - Mutation Rate: float for the chance of a random mutation
+    def __init__(self, data_dict, selection, crossover, mutation_rate):
         # Initialize parameter variables
         self.p = data_dict['p']
         self.num_vertices = data_dict['num_vertices']
@@ -37,7 +19,6 @@ class GeneticAlgorithm:
 
         self.selection_mech = selection
         self.crossover_method = crossover
-        self.mutation_method = mutation
         self.mutation_rate = mutation_rate
 
         # Initialize chromosome
@@ -47,6 +28,7 @@ class GeneticAlgorithm:
             for j in range(1, self.num_vertices+1):
                 if j in selected_vertices:
                     self.chromosome_df.loc[i][j] = 1
+
 
     # Method to begin genetic algorithm
     def start(self):
@@ -64,18 +46,136 @@ class GeneticAlgorithm:
         for i, idx in enumerate(top_indexes):
             mutated_children.iloc[[i]] = self.chromosome_df.iloc[[idx]]
 
-        # Selection --- call roulette, tournament, or rank method
-        if self.selection_mech == "Roulette":
-            selected_chromosomes = self.roulette_selection(chromosome_scores)
-        elif self.selection_mech == "Tournament":
-            selected_chromosomes = self.tournament_selection(chromosome_scores)
-        elif self.selection_mech == "Rank":
-            pass
-        else:
-            print("Invalid selection mechanism")
+        # Selection --- wrapper method calls either roulette, tournament, or rank mechanism
+        chromosome_pool = self.selection(self.selection_mech, chromosome_scores)
+        if chromosome_pool == -1:
+            print("Invalid selection mechanism, must be 'Roulette', 'Tournament', or 'Rank'")
             return
 
-        print()
+        # Crossover --- wrapper method calls either single, double, n-point, or uniform crossover
+        chromosome_pool = self.crossover(self.crossover_method, chromosome_pool)
+        if chromosome_pool == -1:
+            print("Invalid crossover method, must be 'Single Point', 'Double Point', 'N-Point', or 'Uniform'")
+            return
+
+        # Mutation --- 
+
+
+    # Wrapper method for crossovers
+    def crossover(self, mech, parents):
+        if mech == "Single Point":
+            return self.single_point_crossover(parents)
+        elif mech == "Double Point":
+            return self.double_point_crossover(parents)
+        elif mech == "N-Point":
+            return self.n_point_crossover(parents)
+        elif mech == "Uniform":
+            return self.uniform_crossover(parents)
+        else:
+            return -1
+
+            
+    # Method for single point crossover, returns child pool
+    def single_point_crossover(self, parents):
+        child_pool = []
+        for i in range(50):
+            # Randomly select crossover point and parents
+            point = random.randint(1, 30)
+            selected_parents = random.sample(parents, 2)
+
+            # Create variables for each parent
+            parent1 = selected_parents[0].to_numpy()[0]
+            parent2 = selected_parents[1].to_numpy()[0]
+
+            # Crossover parents to produce child chromosomes
+            child1 = np.append(parent1[:point], parent2[point:]).reshape((1, 30))
+            child2 = np.append(parent2[:point], parent1[point:]).reshape((1, 30))
+
+            # Fix up children if infeasible
+            while child1.sum() < self.p:
+                child1[0, random.choice(np.where(child1 == 0)[1])] = 1
+
+            while child1.sum() > self.p:
+                child1[0, random.choice(np.where(child1 == 1)[1])] = 0
+
+            while child2.sum() < self.p:
+                child2[0, random.choice(np.where(child2 == 0)[1])] = 1
+
+            while child2.sum() > self.p:
+                child2[0, random.choice(np.where(child2 == 1)[1])] = 0
+
+            # Add children to pool
+            child_pool.append(child1[0])
+            child_pool.append(child2[0])
+
+        # Return pool of children
+        return child_pool
+
+
+    # Method for double point crossover, returns child pool
+    def double_point_crossover(self, parents):
+        pass
+
+
+    # Method for n-point crossover, returns child pool
+    def n_point_crossover(self, parents):
+        pass
+
+
+    # Method for uniform crossoverm returns child pool
+    def uniform_crossover(self, parents):
+        pass
+
+
+    # Score chromosome based on total distance from points to centers
+    def score_chrsomosome(self, chromosome, idx):
+        # Get list of centers and remaining points to be assigned
+        centers = [i for i in chromosome.columns if chromosome.loc[idx][i] == 1]
+        rem_points = [i for i in self.vertices if i not in centers]
+
+        # Assign points to centers and calculate distance
+        center_dict = {idx: self.vertice_coords[idx - 1] for idx in centers}
+        rem_point_dict = {idx: self.vertice_coords[idx - 1] for idx in rem_points}
+        total_distance = 0
+        point_assigments = {}
+        for key, val in rem_point_dict.items():
+            closest_center = self.get_closest_center(val, center_dict)
+            total_distance += closest_center[2]
+            point_assigments.update({key: {closest_center[0], closest_center[1]}})
+        return total_distance
+
+
+    # Method to find closest center to a point
+    def get_closest_center(self, point, centers):
+        closest = None
+        closest_dist = None
+        for key, val in centers.items():
+            dist = self.get_distance(point, val)
+            if closest is None:
+                closest = key
+                closest_dist = dist
+                continue
+            if dist < closest_dist:
+                closest = key
+                closest_dist = dist
+        return [closest, centers[closest], closest_dist]
+
+
+    # Calculate Euclidean distance between two points
+    def get_distance(self, point, center):
+        return np.sqrt((point[0] - center[0])**2 + (point[1] - center[1])**2)
+
+
+    # Wrapper method for selection
+    def selection(self, mech, scores):
+        if mech == "Roulette":
+            return self.roulette_selection(scores)
+        elif mech == "Tournament":
+            return self.tournament_selection(scores)
+        elif mech == "Rank":
+            return self.rank_selection(scores)
+        else:
+            return -1
 
 
     # Method for Roulette selection
@@ -91,6 +191,7 @@ class GeneticAlgorithm:
         # Select and return chromosomes based on percentages
         selections = [scores.index(np.random.choice(scores, p=percentages)) for i in range(100)]
         return [self.chromosome_df.iloc[[i]] for i in selections]
+
 
     # Method for tournament selection
     def tournament_selection(self, scores):
@@ -120,52 +221,45 @@ class GeneticAlgorithm:
         # Return chromosomes from index list
         return [self.chromosome_df.iloc[[i]] for i in selected_indexes]
 
+
     # Method for rank selection
-    def rank_selection(self):
-        pass
+    def rank_selection(self, scores):
+        # Sort scores and rank
+        sorted_scores = sorted(scores)
+        score_ranks = [sorted_scores.index(val)+1 for val in scores]
+
+        # Compute sum of ranks and normalize scores
+        rank_sum = sum(score_ranks)
+        rank_normalized = [rank_sum/val for val in score_ranks]
+
+        # Sum normalized scores and get percentages
+        normalized_sum = sum(rank_normalized)
+        score_percentages = [val/normalized_sum for val in rank_normalized]
+
+        # Select and return chromosomes based on percentages
+        selections = [scores.index(np.random.choice(scores, p=score_percentages)) for i in range(100)]
+        return [self.chromosome_df.iloc[[i]] for i in selections]
 
 
+# Method to open file and get data
+#   - Returns dictionary of p, num_vertices, and coordinates
+def open_file(file_path):
+    with open(file_path, 'r') as file:
+        data_string = file.read().split('\n')
 
-    # Score chromosome based on total distance from points to centers
-    def score_chrsomosome(self, chromosome, idx):
-        # Get list of centers and remaining points to be assigned
-        centers = [i for i in chromosome.columns if chromosome.loc[idx][i] == 1]
-        rem_points = [i for i in self.vertices if i not in centers]
+    data_info = data_string[0].split(' ')
+    p = int(data_info[0])
+    num_vertices = int(data_info[1])
 
-        # Assign points to centers and calculate distance
-        center_dict = {idx: self.vertice_coords[idx - 1] for idx in centers}
-        rem_point_dict = {idx: self.vertice_coords[idx - 1] for idx in rem_points}
-        total_distance = 0
-        point_assigments = {}
-        for key, val in rem_point_dict.items():
-            closest_center = self.get_closest_center(val, center_dict)
-            total_distance += closest_center[2]
-            point_assigments.update({key: {closest_center[0], closest_center[1]}})
-        return total_distance
-
-    # Method to find closest center to a point
-    def get_closest_center(self, point, centers):
-        closest = None
-        closest_dist = None
-        for key, val in centers.items():
-            dist = self.get_distance(point, val)
-            if closest is None:
-                closest = key
-                closest_dist = dist
-                continue
-            if dist < closest_dist:
-                closest = key
-                closest_dist = dist
-        return [closest, centers[closest], closest_dist]
-
-    # Calculate Euclidean distance between two points
-    def get_distance(self, point, center):
-        return np.sqrt((point[0] - center[0])**2 + (point[1] - center[1])**2)
-
+    raw_data = [data_string[i].split(',') for i in range(1, len(data_string))]
+    data = [(float(item[0]), float(item[1])) for item in raw_data if item[0] != '']
+    # centroids = [data[i] for i in range(p)]
+    # data = data[p:]
+    return {'p': p, 'num_vertices': num_vertices, 'data': data}
 
 
 if __name__ == "__main__":
 
     data_dict = open_file('data\\toy_data.txt')
-    GA = GeneticAlgorithm(data_dict, 'Tournament', 'MX1', 'Single-Point', 0.05)
+    GA = GeneticAlgorithm(data_dict, 'Roulette', 'Single Point', 0.05)
     GA.start()
