@@ -79,7 +79,7 @@ class GeneticAlgorithm:
     def single_point_crossover(self, parents):
         child_pool = []
         for i in range(50):
-            # Randomly select crossover point and parents
+            # Randomly select crossover points and parents
             point = random.randint(1, 30)
             selected_parents = random.sample(parents, 2)
 
@@ -114,7 +114,48 @@ class GeneticAlgorithm:
 
     # Method for double point crossover, returns child pool
     def double_point_crossover(self, parents):
-        pass
+        child_pool = []
+        for i in range(50):
+            # Randomly select two crossover points
+            point1 = random.randint(1, 30)
+            point2 = random.randint(1, 30)
+
+            # If points are the same, choose a new point2
+            while point1 == point2:
+                point2 = random.randint(1, 30)
+
+            # Swap points if point2 < point1
+            if point2 < point1:
+                point1, point2 = point2, point1
+
+            # Randomly select two parents and create arrays
+            selected_parents = random.sample(parents, 2)
+            parent1 = selected_parents[0].to_numpy()[0]
+            parent2 = selected_parents[1].to_numpy()[0]
+
+            # Crossover parents to produce children chromosomes
+            child1 = np.concatenate((parent1[:point1],parent2[point1:point2],parent1[point2:])).reshape((1, 30))
+            child2 = np.concatenate((parent2[:point1],parent1[point1:point2],parent2[point2:])).reshape((1, 30))
+
+            # Fix up children if infeasible
+            while child1.sum() < self.p:
+                child1[0, random.choice(np.where(child1 == 0)[1])] = 1
+
+            while child1.sum() > self.p:
+                child1[0, random.choice(np.where(child1 == 1)[1])] = 0
+
+            while child2.sum() < self.p:
+                child2[0, random.choice(np.where(child2 == 0)[1])] = 1
+
+            while child2.sum() > self.p:
+                child2[0, random.choice(np.where(child2 == 1)[1])] = 0
+
+            # Add children to pool
+            child_pool.append(child1[0])
+            child_pool.append(child2[0])
+
+        # Return pool of children
+        return child_pool
 
 
     # Method for n-point crossover, returns child pool
@@ -124,7 +165,10 @@ class GeneticAlgorithm:
 
     # Method for uniform crossoverm returns child pool
     def uniform_crossover(self, parents):
-        pass
+        # Generate array of 0's and 1's randomly
+        u = [random.randint(0, 1) for i in range(self.num_vertices)]
+
+        # Next: Use uniform crossover algorithm to generate children
 
 
     # Score chromosome based on total distance from points to centers
@@ -261,5 +305,5 @@ def open_file(file_path):
 if __name__ == "__main__":
 
     data_dict = open_file('data\\toy_data.txt')
-    GA = GeneticAlgorithm(data_dict, 'Roulette', 'Single Point', 0.05)
+    GA = GeneticAlgorithm(data_dict, 'Roulette', 'Uniform', 0.05)
     GA.start()
