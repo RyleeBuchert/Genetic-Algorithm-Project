@@ -360,7 +360,7 @@ def open_file(file_path):
 
 
 if __name__ == "__main__":
-
+    # Open data and run genetic algorithm
     data_dict = open_file('data\\toy_data2.txt')
     GA = GeneticAlgorithm(data_dict, 'Roulette', 'Single Point', 0.05, 150)
     print(GA.start())
