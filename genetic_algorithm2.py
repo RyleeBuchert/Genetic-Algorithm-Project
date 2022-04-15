@@ -32,143 +32,43 @@ class GeneticAlgorithm:
 
     # Method to begin genetic algorithm
     def start(self):
-        # Score each chromosome in the chromosome_df
-        chromosome_scores = []
-        for idx in self.chromosome_df.index:
-            chromosome_scores.append(self.score_chrsomosome(self.chromosome_df.loc[[idx]], idx))
+        for i in range(100):
+            # Score each chromosome in the chromosome_df
+            chromosome_scores = []
+            for idx in self.chromosome_df.index:
+                test = self.chromosome_df.iloc[[idx]]
+                chromosome_scores.append(self.score_chrsomosome(self.chromosome_df.iloc[[idx]], idx))
 
-        # Initialize dataframe for the mutated children
-        mutated_children = pd.DataFrame(np.zeros(shape=(100, self.num_vertices)), columns=self.vertices)
+            print(min(chromosome_scores))
 
-        # Elitism --- place two fittest chromosomes in mutated children pool
-        top_scores = sorted(chromosome_scores)[:2]
-        top_indexes = [chromosome_scores.index(score) for score in top_scores]
-        for i, idx in enumerate(top_indexes):
-            mutated_children.iloc[[i]] = self.chromosome_df.iloc[[idx]]
+            # Initialize dataframe for the mutated children
+            mutated_children = pd.DataFrame(np.zeros(shape=(2, self.num_vertices)), columns=self.vertices)
 
-        # Selection --- wrapper method calls either roulette, tournament, or rank mechanism
-        chromosome_pool = self.selection(self.selection_mech, chromosome_scores)
-        if chromosome_pool == -1:
-            print("Invalid selection mechanism, must be 'Roulette', 'Tournament', or 'Rank'")
-            return
+            # Elitism --- place two fittest chromosomes in mutated children pool
+            top_scores = sorted(chromosome_scores)[:2]
+            top_indexes = [chromosome_scores.index(score) for score in top_scores]
+            for i, idx in enumerate(top_indexes):
+                mutated_children.iloc[[i]] = self.chromosome_df.iloc[[idx]]
 
-        # Crossover --- wrapper method calls either single, double, n-point, or uniform crossover
-        chromosome_pool = self.crossover(self.crossover_method, chromosome_pool)
-        if chromosome_pool == -1:
-            print("Invalid crossover method, must be 'Single Point', 'Double Point', 'N-Point', or 'Uniform'")
-            return
+            # Selection --- wrapper method calls either roulette, tournament, or rank mechanism
+            chromosome_pool = self.selection(self.selection_mech, chromosome_scores)
+            if chromosome_pool == -1:
+                print("Invalid selection mechanism, must be 'Roulette', 'Tournament', or 'Rank'")
+                return
 
-        # Mutation --- 
+            # Crossover --- wrapper method calls either single, double, n-point, or uniform crossover
+            chromosome_pool = self.crossover(self.crossover_method, chromosome_pool)
+            if chromosome_pool == -1:
+                print("Invalid crossover method, must be 'Single Point', 'Double Point', 'N-Point', or 'Uniform'")
+                return
 
+            # Mutation --- randomly flip a bit with 5% probability
+            chromosome_pool = self.mutate(chromosome_pool)
 
-    # Wrapper method for crossovers
-    def crossover(self, mech, parents):
-        if mech == "Single Point":
-            return self.single_point_crossover(parents)
-        elif mech == "Double Point":
-            return self.double_point_crossover(parents)
-        elif mech == "N-Point":
-            return self.n_point_crossover(parents)
-        elif mech == "Uniform":
-            return self.uniform_crossover(parents)
-        else:
-            return -1
-
-            
-    # Method for single point crossover, returns child pool
-    def single_point_crossover(self, parents):
-        child_pool = []
-        for i in range(50):
-            # Randomly select crossover points and parents
-            point = random.randint(1, 30)
-            selected_parents = random.sample(parents, 2)
-
-            # Create variables for each parent
-            parent1 = selected_parents[0].to_numpy()[0]
-            parent2 = selected_parents[1].to_numpy()[0]
-
-            # Crossover parents to produce child chromosomes
-            child1 = np.append(parent1[:point], parent2[point:]).reshape((1, 30))
-            child2 = np.append(parent2[:point], parent1[point:]).reshape((1, 30))
-
-            # Fix up children if infeasible
-            while child1.sum() < self.p:
-                child1[0, random.choice(np.where(child1 == 0)[1])] = 1
-
-            while child1.sum() > self.p:
-                child1[0, random.choice(np.where(child1 == 1)[1])] = 0
-
-            while child2.sum() < self.p:
-                child2[0, random.choice(np.where(child2 == 0)[1])] = 1
-
-            while child2.sum() > self.p:
-                child2[0, random.choice(np.where(child2 == 1)[1])] = 0
-
-            # Add children to pool
-            child_pool.append(child1[0])
-            child_pool.append(child2[0])
-
-        # Return pool of children
-        return child_pool
-
-
-    # Method for double point crossover, returns child pool
-    def double_point_crossover(self, parents):
-        child_pool = []
-        for i in range(50):
-            # Randomly select two crossover points
-            point1 = random.randint(1, 30)
-            point2 = random.randint(1, 30)
-
-            # If points are the same, choose a new point2
-            while point1 == point2:
-                point2 = random.randint(1, 30)
-
-            # Swap points if point2 < point1
-            if point2 < point1:
-                point1, point2 = point2, point1
-
-            # Randomly select two parents and create arrays
-            selected_parents = random.sample(parents, 2)
-            parent1 = selected_parents[0].to_numpy()[0]
-            parent2 = selected_parents[1].to_numpy()[0]
-
-            # Crossover parents to produce children chromosomes
-            child1 = np.concatenate((parent1[:point1],parent2[point1:point2],parent1[point2:])).reshape((1, 30))
-            child2 = np.concatenate((parent2[:point1],parent1[point1:point2],parent2[point2:])).reshape((1, 30))
-
-            # Fix up children if infeasible
-            while child1.sum() < self.p:
-                child1[0, random.choice(np.where(child1 == 0)[1])] = 1
-
-            while child1.sum() > self.p:
-                child1[0, random.choice(np.where(child1 == 1)[1])] = 0
-
-            while child2.sum() < self.p:
-                child2[0, random.choice(np.where(child2 == 0)[1])] = 1
-
-            while child2.sum() > self.p:
-                child2[0, random.choice(np.where(child2 == 1)[1])] = 0
-
-            # Add children to pool
-            child_pool.append(child1[0])
-            child_pool.append(child2[0])
-
-        # Return pool of children
-        return child_pool
-
-
-    # Method for n-point crossover, returns child pool
-    def n_point_crossover(self, parents):
-        pass
-
-
-    # Method for uniform crossoverm returns child pool
-    def uniform_crossover(self, parents):
-        # Generate array of 0's and 1's randomly
-        u = [random.randint(0, 1) for i in range(self.num_vertices)]
-
-        # Next: Use uniform crossover algorithm to generate children
+            # Update chromosome pool with mutated children
+            drop_indexes = random.sample(list(range(99)), 2)
+            self.chromosome_df = pd.concat([mutated_children, pd.DataFrame(chromosome_pool, columns=self.vertices).drop(drop_indexes)])
+            self.chromosome_df.reset_index(drop=True, inplace=True)
 
 
     # Score chromosome based on total distance from points to centers
@@ -186,6 +86,8 @@ class GeneticAlgorithm:
             closest_center = self.get_closest_center(val, center_dict)
             total_distance += closest_center[2]
             point_assigments.update({key: {closest_center[0], closest_center[1]}})
+
+        # Return sum of Euclidean distances
         return total_distance
 
 
@@ -285,6 +187,164 @@ class GeneticAlgorithm:
         return [self.chromosome_df.iloc[[i]] for i in selections]
 
 
+    # Wrapper method for crossovers
+    def crossover(self, mech, parents):
+        if mech == "Single Point":
+            return self.single_point_crossover(parents)
+        elif mech == "Double Point":
+            return self.double_point_crossover(parents)
+        elif mech == "N-Point":
+            return self.n_point_crossover(parents)
+        elif mech == "Uniform":
+            return self.uniform_crossover(parents)
+        else:
+            return -1
+
+            
+    # Method for single point crossover, returns child pool
+    def single_point_crossover(self, parents):
+        child_pool = []
+        for i in range(50):
+            # Randomly select crossover points and parents
+            point = random.randint(1, 30)
+            selected_parents = random.sample(parents, 2)
+
+            # Create variables for each parent
+            parent1 = selected_parents[0].to_numpy()[0]
+            parent2 = selected_parents[1].to_numpy()[0]
+
+            # Crossover parents to produce child chromosomes
+            child1 = np.append(parent1[:point], parent2[point:]).reshape((1, 30))
+            child2 = np.append(parent2[:point], parent1[point:]).reshape((1, 30))
+
+            # Fix up children if infeasible
+            child1, child2 = self.fix_up(child1, child2)
+
+            # Add children to pool
+            child_pool.append(child1[0])
+            child_pool.append(child2[0])
+
+        # Return pool of children
+        return child_pool
+
+
+    # Method for double point crossover, returns child pool
+    def double_point_crossover(self, parents):
+        child_pool = []
+        for i in range(50):
+            # Randomly select two crossover points
+            point1 = random.randint(1, 30)
+            point2 = random.randint(1, 30)
+
+            # If points are the same, choose a new point2
+            while point1 == point2:
+                point2 = random.randint(1, 30)
+
+            # Swap points if point2 < point1
+            if point2 < point1:
+                point1, point2 = point2, point1
+
+            # Randomly select two parents and create arrays
+            selected_parents = random.sample(parents, 2)
+            parent1 = selected_parents[0].to_numpy()[0]
+            parent2 = selected_parents[1].to_numpy()[0]
+
+            # Crossover parents to produce children chromosomes
+            child1 = np.concatenate((parent1[:point1],parent2[point1:point2],parent1[point2:])).reshape((1, 30))
+            child2 = np.concatenate((parent2[:point1],parent1[point1:point2],parent2[point2:])).reshape((1, 30))
+
+            # Fix up children if infeasible
+            child1, child2 = self.fix_up(child1, child2)
+
+            # Add children to pool
+            child_pool.append(child1[0])
+            child_pool.append(child2[0])
+
+        # Return pool of children
+        return child_pool
+
+
+    # Method for n-point crossover, returns child pool
+    def n_point_crossover(self, parents):
+        pass
+
+
+    # Method for uniform crossoverm returns child pool
+    def uniform_crossover(self, parents):
+        child_pool = []
+        for i in range(50):
+            # Generate array of 0's and 1's randomly
+            u = [random.randint(0, 1) for i in range(self.num_vertices)]
+
+            # Initialize child arrays
+            child1 = np.zeros(shape=(1, self.num_vertices))
+            child2 = np.zeros(shape=(1, self.num_vertices))
+
+            # Randomly select two parents and create arrays
+            selected_parents = random.sample(parents, 2)
+            parent1 = selected_parents[0].to_numpy()[0]
+            parent2 = selected_parents[1].to_numpy()[0]
+
+            # Use uniform crossover algorithm to generate children
+            for idx, bit in enumerate(u):
+                if bit == 0:
+                    child1[0, idx] = parent1[idx]
+                    child2[0, idx] = parent2[idx]
+                elif bit == 1:
+                    child1[0, idx] = parent2[idx]
+                    child2[0, idx] = parent1[idx]
+
+            # Fix up children if infeasible
+            child1, child2 = self.fix_up(child1, child2)
+
+            # Add children to pool
+            child_pool.append(child1[0])
+            child_pool.append(child2[0])
+        
+        # Return pool of children
+        return child_pool
+
+
+    # Method to fix up infeasible chromosomes
+    def fix_up(self, child1, child2):
+        # Fix up children if infeasible
+        while child1.sum() < self.p:
+            child1[0, random.choice(np.where(child1 == 0)[1])] = 1
+
+        while child1.sum() > self.p:
+            child1[0, random.choice(np.where(child1 == 1)[1])] = 0
+
+        while child2.sum() < self.p:
+            child2[0, random.choice(np.where(child2 == 0)[1])] = 1
+
+        while child2.sum() > self.p:
+            child2[0, random.choice(np.where(child2 == 1)[1])] = 0
+
+        return child1, child2
+
+
+    # Method for mutating chromosomes in pool
+    def mutate(self, pool):
+        for child in pool:
+            chance = random.uniform(0, 1)
+            if chance < 0.05:
+                # Randomly choose index and flip bit
+                index = random.randint(0, self.num_vertices-1)
+                if child[index] == 0:
+                    child[index] = 1
+                elif child[index] == 1:
+                    child[index] = 0
+
+                # Fix up if infeasible
+                while child.sum() < self.p:
+                    child[random.choice(np.where(child == 0)[0])] = 1
+                while child.sum() > self.p:
+                    child[random.choice(np.where(child == 1)[0])] = 0
+
+        # Return mutated child pool
+        return pool
+
+
 # Method to open file and get data
 #   - Returns dictionary of p, num_vertices, and coordinates
 def open_file(file_path):
@@ -305,5 +365,5 @@ def open_file(file_path):
 if __name__ == "__main__":
 
     data_dict = open_file('data\\toy_data.txt')
-    GA = GeneticAlgorithm(data_dict, 'Roulette', 'Uniform', 0.05)
+    GA = GeneticAlgorithm(data_dict, 'Roulette', 'Single Point', 0.05)
     GA.start()
