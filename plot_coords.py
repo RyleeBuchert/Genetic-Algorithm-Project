@@ -26,7 +26,7 @@ def onclick(event):
 
 if __name__ == "__main__":
     # Number of medians
-    p = 5
+    p = 8
     med_count = 1
     
     # Array to store coordinates
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     plt.ylim([0, 10])
     plt.show()
 
-    with open('data\\toy_data.txt', 'w+') as file:
+    with open('data\\toy_data2.txt', 'w+') as file:
         file.write(str(p) + ' ' + str(len(median_coords) + len(point_coords)) + '\n')
 
         for item in median_coords:
