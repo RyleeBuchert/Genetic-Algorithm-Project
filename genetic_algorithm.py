@@ -6,7 +6,7 @@ import time
 
 class GeneticAlgorithm:
     # Constructor:
-    #   - File: file object from 'open_file' method
+    #   - Data_Dict: file object from 'open_file' method
     #   - Selection: string either 'Rank', 'Tournament', or 'Roulette'
     #   - Crossover: string either 'Single Point', 'Double Point, 'N-Point', or 'Uniform'
     #   - Mutation Rate: float for the chance of a random mutation
