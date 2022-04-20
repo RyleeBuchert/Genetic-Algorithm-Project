@@ -189,8 +189,6 @@ class GeneticAlgorithm:
             return self.single_point_crossover(parents)
         elif mech == "Double Point":
             return self.double_point_crossover(parents)
-        elif mech == "N-Point":
-            return self.n_point_crossover(parents)
         elif mech == "Uniform":
             return self.uniform_crossover(parents)
         else:
@@ -261,12 +259,7 @@ class GeneticAlgorithm:
         return child_pool
 
 
-    # Method for n-point crossover, returns child pool
-    def n_point_crossover(self, parents):
-        pass
-
-
-    # Method for uniform crossoverm returns child pool
+    # Method for uniform crossover, returns child pool
     def uniform_crossover(self, parents):
         child_pool = []
         for i in range(50):
