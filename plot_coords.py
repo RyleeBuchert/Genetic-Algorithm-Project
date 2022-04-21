@@ -42,7 +42,7 @@ if __name__ == "__main__":
     plt.ylim([0, 10])
     plt.show()
 
-    with open('data\\toy_data3.txt', 'w+') as file:
+    with open('data\\toy_data4.txt', 'w+') as file:
         file.write(str(p) + ' ' + str(len(median_coords) + len(point_coords)) + '\n')
 
         for item in median_coords:

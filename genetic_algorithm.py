@@ -379,8 +379,8 @@ def open_file(file_path):
 
 if __name__ == "__main__":
     # Open data and run genetic algorithm
-    data_dict = open_file('data\\toy_data3.txt')
-    GA = GeneticAlgorithm(data_dict, 'Roulette', 'Single Point', 0.05, 50)
+    data_dict = open_file('data\\toy_data4.txt')
+    GA = GeneticAlgorithm(data_dict, 'Roulette', 'Single Point', 0.05, 150)
     GA.start()
     print(GA.best_chromosome)
     GA.plot(GA.best_chromosome)

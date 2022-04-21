@@ -39,12 +39,23 @@ class SimulatedAnnealing:
         count = 0
         while self.T > 1:
             while i < self.iterations:
+                # Perturb S to get new solution
                 new_S = self.perturb(self.S)
-                if (self.score(new_S, 'N') < self.score(self.S, 'N')):
+                
+                # Calculate scores for both solutions
+                h_S = self.score(self.S, 'N')
+                h_new_S = self.score(new_S, 'N')
+
+                # Simulated annealing condition statement
+                random_num = random.uniform(0, 1)
+                if (h_new_S < h_S) or (random_num < np.exp((h_S - h_new_S)/self.T)):
                     self.S = copy.deepcopy(new_S)
+
+                # Print scores and increment counters
                 print(str(count+1) + ': ' + str(self.score(self.S, 'N')))
                 i += 1
                 count += 1
+            # Update temp and iterations with parameters
             self.T = self.alpha * self.T
             self.iterations = self.beta * self.iterations
 
@@ -153,8 +164,8 @@ def open_file(file_path):
 
 if __name__ == "__main__":
     # Open data and run simulated annealing
-    data_dict = open_file('data\\toy_data3.txt')
-    SA = SimulatedAnnealing(data_dict, 'Mutation', 100)
+    data_dict = open_file('data\\toy_data4.txt')
+    SA = SimulatedAnnealing(data_dict, 'Mutation', 500)
     SA.start()
     print(SA.S)
     SA.plot()
