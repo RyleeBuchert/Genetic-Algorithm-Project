@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import random
@@ -36,8 +37,8 @@ class GeneticAlgorithm:
     def start(self):
         for i in range(self.num_iterations):
             # Score each chromosome in the chromosome_df
-            chromosome_scores = [self.score_chrsomosome(self.chromosome_df.iloc[[i]], i) for i in self.chromosome_df.index]
-            print(i+1 + ': ' + min(chromosome_scores))
+            chromosome_scores = [self.score_chrsomosome(self.chromosome_df.iloc[[i]], i, 'N') for i in self.chromosome_df.index]
+            print(str(i+1) + ': ' + str(min(chromosome_scores)))
 
             # Elitism --- place two fittest chromosomes in next generation with no changes
             top_chromosomes = pd.DataFrame(np.zeros(shape=(2, self.num_vertices)), columns=self.vertices)
@@ -63,12 +64,12 @@ class GeneticAlgorithm:
             self.chromosome_df = pd.concat([top_chromosomes, pd.DataFrame(chromosome_pool, columns=self.vertices).drop(drop_indexes)])
             self.chromosome_df.reset_index(drop=True, inplace=True)
         
-        # Return chromosome df
-        return self.chromosome_df.iloc[[chromosome_scores.index(min(chromosome_scores))]]
+        # Plot graph and return chromosome df
+        self.best_chromosome = self.chromosome_df.iloc[[chromosome_scores.index(min(chromosome_scores))]]
 
 
     # Score chromosome based on total distance from points to centers
-    def score_chrsomosome(self, chromosome, idx):
+    def score_chrsomosome(self, chromosome, idx, mode):
         # Get list of centers and remaining points to be assigned
         centers = [i for i in chromosome.columns if chromosome.loc[idx][i] == 1]
         rem_points = [i for i in self.vertices if i not in centers]
@@ -81,10 +82,13 @@ class GeneticAlgorithm:
         for key, val in rem_point_dict.items():
             closest_center = self.get_closest_center(val, center_dict)
             total_distance += closest_center[2]
-            point_assigments.update({key: {closest_center[0], closest_center[1]}})
+            point_assigments.update({key: closest_center[1]})
 
         # Return sum of Euclidean distances
-        return total_distance
+        if mode == 'N':
+            return total_distance
+        elif mode == 'P':
+            return [center_dict, rem_point_dict, point_assigments]
 
 
     # Method to find closest center to a point
@@ -335,6 +339,28 @@ class GeneticAlgorithm:
         return pool
 
 
+    # Method to plot graph with connections
+    def plot(self, chromosome):
+        # Get centers and assign points
+        chromosome.reset_index(drop=True, inplace=True)
+        assignments = self.score_chrsomosome(chromosome, 0, mode='P')
+
+        # Plot points on graph
+        plt.xlim([0, 10])
+        plt.ylim([0, 10])
+        for val in assignments[0].values():
+            plt.plot(val[0], val[1], 'ro')
+        for val in assignments[1].values():
+            plt.plot(val[0], val[1], 'bo')
+
+        # Connect points to centroids and show graph
+        for key, val in assignments[2].items():
+            point = self.vertice_coords[key-1]
+            center = val
+            plt.plot([point[0], center[0]], [point[1], center[1]], 'c')
+        plt.show()
+
+
 # Method to open file and get data
 #   - Returns dictionary of p, num_vertices, and coordinates
 def open_file(file_path):
@@ -346,7 +372,7 @@ def open_file(file_path):
     num_vertices = int(data_info[1])
 
     raw_data = [data_string[i].split(',') for i in range(1, len(data_string))]
-    data = [(float(item[0]), float(item[1])) for item in raw_data if item[0] != '']
+    data = [[float(item[0]), float(item[1])] for item in raw_data if item[0] != '']
     # centroids = [data[i] for i in range(p)]
     # data = data[p:]
     return {'p': p, 'num_vertices': num_vertices, 'data': data}
@@ -354,6 +380,8 @@ def open_file(file_path):
 
 if __name__ == "__main__":
     # Open data and run genetic algorithm
-    data_dict = open_file('data\\toy_data2.txt')
-    GA = GeneticAlgorithm(data_dict, 'Roulette', 'Single Point', 0.05, 150)
-    print(GA.start())
+    data_dict = open_file('data\\toy_data3.txt')
+    GA = GeneticAlgorithm(data_dict, 'Roulette', 'Single Point', 0.05, 50)
+    GA.start()
+    print(GA.best_chromosome)
+    GA.plot(GA.best_chromosome)
