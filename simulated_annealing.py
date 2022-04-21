@@ -152,7 +152,7 @@ def open_file(file_path):
 
 
 if __name__ == "__main__":
-    # Open data and run genetic algorithm
+    # Open data and run simulated annealing
     data_dict = open_file('data\\toy_data3.txt')
     SA = SimulatedAnnealing(data_dict, 'Mutation', 100)
     SA.start()
