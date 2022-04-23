@@ -1,0 +1,9 @@
+Roulette, Single_Point -- Best Score: 34.594, Avg Score: 35.872, Avg Iterations: 212.36
+Roulette, Double_point -- Best Score: 34.594, Avg Score: 35.714, Avg Iterations: 197.5
+Roulette, Uniform -- Best Score: 34.594, Avg Score: 35.676, Avg Iterations: 218.98
+Tournament, Single_Point -- Best Score: 34.594, Avg Score: 35.153, Avg Iterations: 183.4
+Tournament, Double_Point -- Best Score: 34.594, Avg Score: 34.656, Avg Iterations: 190.28
+Tournament, Uniform -- Best Score: 34.594, Avg Score: 35.004, Avg Iterations: 214.72
+Rank, Single_Point -- Best Score: 34.594, Avg Score: 34.975, Avg Iterations: 172.26
+Rank, Double_Point -- Best Score: 34.594, Avg Score: 34.836, Avg Iterations: 158.44
+Rank, Uniform -- Best Score: 34.594, Avg Score: 34.821, Avg Iterations: 152.94
