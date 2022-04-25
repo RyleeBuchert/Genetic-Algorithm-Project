@@ -8,8 +8,8 @@ class FoolishHillClimbing:
     # Constructor:
     #   - Data_Dict: file object from 'open_file' method
     #   - Iter: int for the number of iterations annealing runs for
-    #   - Alpha: ...
-    #   - Beta: ...
+    #   - Alpha: Parameter for decreasing temperature
+    #   - Beta: Parameter for increasing the # of inner-loop iterations
     def __init__(self, data_dict, iter, alpha=None, beta=None):
         # Get dataset variables
         self.p = data_dict['p']

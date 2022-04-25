@@ -9,8 +9,8 @@ class SimulatedAnnealing:
     # Constructor:
     #   - Data_Dict: file object from 'open_file' method
     #   - Iter: int for the number of iterations annealing runs for
-    #   - Alpha: ...
-    #   - Beta: ...
+    #   - Alpha: Parameter for decreasing temperature
+    #   - Beta: Parameter for increasing the # of inner-loop iterations
     def __init__(self, data_dict, iter, alpha=None, beta=None):
         # Get dataset variables
         self.p = data_dict['p']
@@ -199,82 +199,45 @@ def open_file(file_path):
 
 
 if __name__ == "__main__":
-    # # Open data and run simulated annealing
-    # data_dict = open_file('data\\toy_data4.txt')
-    # SA = SimulatedAnnealing(data_dict, 1000)
-    # SA.start()
-    # print(SA.S)
-    # SA.plot()
+    # Open data and run simulated annealing
+    data_dict = open_file('data\\toy_data4.txt')
+    SA = SimulatedAnnealing(data_dict, 1000)
+    SA.start()
+    print(SA.S)
+    SA.plot()
 
 
-    # Collect results for simulated annealing
-    sizes = ['large2']
+    # # Collect results for simulated annealing
+    # sizes = ['small', 'medium', 'large1', 'large2']
 
-    for s in sizes:
-        if s == 'small':
-            data_dict = open_file('data\\toy_data.txt')
-        elif s == 'medium':
-            data_dict = open_file('data\\toy_data2.txt')
-        elif s == 'large1':
-            data_dict = open_file('data\\large1.txt')
-        elif s == 'large2':
-            data_dict = open_file('data\\large2.txt') 
+    # for s in sizes:
+    #     if s == 'small':
+    #         data_dict = open_file('data\\toy_data.txt')
+    #     elif s == 'medium':
+    #         data_dict = open_file('data\\toy_data2.txt')
+    #     elif s == 'large1':
+    #         data_dict = open_file('data\\large1.txt')
+    #     elif s == 'large2':
+    #         data_dict = open_file('data\\large2.txt') 
 
-        log_file = open(f'results\\SA_{s}_data_results.txt', 'w')
+    #     log_file = open(f'results\\SA_{s}_data_results.txt', 'w')
 
-        best_solutions = []
-        best_scores = []
-        iterations = []
-        for i in range(10):
-            SA = SimulatedAnnealing(data_dict, 1000)
-            print('Iteration ' + str(i))
-            SA.start()
+    #     best_solutions = []
+    #     best_scores = []
+    #     iterations = []
+    #     for i in range(10):
+    #         SA = SimulatedAnnealing(data_dict, 1000)
+    #         print('Iteration ' + str(i))
+    #         SA.start()
 
-            best_solutions.append(SA.S)
-            best_scores.append(SA.score(SA.S, 'N'))
-            iterations.append(SA.best_iter)
+    #         best_solutions.append(SA.S)
+    #         best_scores.append(SA.score(SA.S, 'N'))
+    #         iterations.append(SA.best_iter)
 
-            if i == 9:
-                SA.plot(best_solutions[best_scores.index(min(best_scores))], f'{s}', (round(sum(iterations)/len(iterations),3),round(min(best_scores),3)))
+    #         if i == 9:
+    #             SA.plot(best_solutions[best_scores.index(min(best_scores))], f'{s}', (round(sum(iterations)/len(iterations),3),round(min(best_scores),3)))
 
-        out_string = 'Simulated Annealing -- Best Score: '+str(round(min(best_scores),3))+', Avg Score: '+str(round(sum(best_scores)/len(best_scores),3))+', Avg Iterations: '+str(round(sum(iterations)/len(iterations),3))+'\n'
-        log_file.write(out_string)
+    #     out_string = 'Simulated Annealing -- Best Score: '+str(round(min(best_scores),3))+', Avg Score: '+str(round(sum(best_scores)/len(best_scores),3))+', Avg Iterations: '+str(round(sum(iterations)/len(iterations),3))+'\n'
+    #     log_file.write(out_string)
 
-        log_file.close()
-
-
-
-    # Collect results for foolish hill climbing
-    sizes = ['small', 'medium', 'large1', 'large2']
-
-    for s in sizes:
-        if s == 'small':
-            data_dict = open_file('data\\toy_data.txt')
-        elif s == 'medium':
-            data_dict = open_file('data\\toy_data2.txt')
-        elif s == 'large1':
-            data_dict = open_file('data\\large1.txt')
-        elif s == 'large2':
-            data_dict = open_file('data\\large2.txt') 
-
-        log_file = open(f'results\\Foolish_{s}_data_results.txt', 'w')
-
-        best_solutions = []
-        best_scores = []
-        iterations = []
-        for i in range(10):
-            Foolish = FoolishHillClimbing(data_dict, 1000)
-            print('Iteration ' + str(i))
-            Foolish.start()
-
-            best_solutions.append(Foolish.S)
-            best_scores.append(Foolish.score(Foolish.S, 'N'))
-            iterations.append(Foolish.best_iter)
-
-            if i == 9:
-                Foolish.plot(best_solutions[best_scores.index(min(best_scores))], f'{s}', (round(sum(iterations)/len(iterations),3),round(min(best_scores),3)))
-
-        out_string = 'Foolish Hill Climbing -- Best Score: '+str(round(min(best_scores),3))+', Avg Score: '+str(round(sum(best_scores)/len(best_scores),3))+', Avg Iterations: '+str(round(sum(iterations)/len(iterations),3))+'\n'
-        log_file.write(out_string)
-
-        log_file.close()
+    #     log_file.close()

@@ -410,16 +410,16 @@ def open_file(file_path):
 
 
 if __name__ == "__main__":
-    # # Open data and run genetic algorithm
-    # data_dict = open_file('data\\toy_data2.txt')
+    # Open data and run genetic algorithm
+    data_dict = open_file('data\\toy_data2.txt')
 
-    # GA = GeneticAlgorithm(data_dict, 'Rank', 'Uniform', 0.05, 100)
-    # GA.start()
-    # print(GA.best_chromosome)
-    # GA.plot(GA.best_chromosome, 'Rank', 'Uniform', 'Small')
+    GA = GeneticAlgorithm(data_dict, 'Rank', 'Uniform', 0.05, 100)
+    GA.start()
+    print(GA.best_chromosome)
+    GA.plot(GA.best_chromosome, 'Rank', 'Uniform', 'Small')
 
 
-
+    # # Log results and get graphs
     # data_dict = open_file('data\\large1.txt')
     # log_file = open('results\\large_data_results.txt', 'w')
     
@@ -447,78 +447,3 @@ if __name__ == "__main__":
     #         log_file.write(out_string)
 
     # log_file.close()
-
-
-
-    # Open data and run genetic algorithm
-    data_dict = open_file('data\\toy_data2.txt')
-
-    selections = ['Rank']
-    crossovers = ['Uniform']
-
-    for s in selections:
-        for c in crossovers:
-            best_chromosomes = []
-            best_scores = []
-            iterations = []
-            for i in range(50):
-                GA = GeneticAlgorithm(data_dict, s, c, 0.05, 1000)
-                GA.start()
-                
-                best = GA.best_chromosome
-                best_chromosomes.append(best)
-                best_scores.append(GA.score_chrsomosome(best, 0, 'N'))
-                iterations.append(GA.best_iter)
-
-                if i == 49:
-                    GA.plot(best_chromosomes[best_scores.index(min(best_scores))], s, c, 'medium', (round(sum(iterations)/len(iterations),3), round(min(best_scores),3)))
-
-
-
-    # Open data and run genetic algorithm
-    data_dict = open_file('data\\large1.txt')
-
-    selections = ['Tournament']
-    crossovers = ['Double_Point']
-
-    for s in selections:
-        for c in crossovers:
-            best_chromosomes = []
-            best_scores = []
-            iterations = []
-            for i in range(10):
-                GA = GeneticAlgorithm(data_dict, s, c, 0.05, 1000)
-                GA.start()
-                
-                best = GA.best_chromosome
-                best_chromosomes.append(best)
-                best_scores.append(GA.score_chrsomosome(best, 0, 'N'))
-                iterations.append(GA.best_iter)
-
-                if i == 9:
-                    GA.plot(best_chromosomes[best_scores.index(min(best_scores))], s, c, 'large1', (round(sum(iterations)/len(iterations),3), round(min(best_scores),3)))
-
-
-
-    # Open data and run genetic algorithm
-    data_dict = open_file('data\\large2.txt')
-
-    selections = ['Rank']
-    crossovers = ['Uniform']
-
-    for s in selections:
-        for c in crossovers:
-            best_chromosomes = []
-            best_scores = []
-            iterations = []
-            for i in range(10):
-                GA = GeneticAlgorithm(data_dict, s, c, 0.05, 1000)
-                GA.start()
-                
-                best = GA.best_chromosome
-                best_chromosomes.append(best)
-                best_scores.append(GA.score_chrsomosome(best, 0, 'N'))
-                iterations.append(GA.best_iter)
-
-                if i == 9:
-                    GA.plot(best_chromosomes[best_scores.index(min(best_scores))], s, c, 'large2', (round(sum(iterations)/len(iterations),3), round(min(best_scores),3)))
