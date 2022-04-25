@@ -1,1 +1,0 @@
-Simulated Annealing -- Best Score: 157.136, Avg Score: 161.241, Avg Iterations: 362525.3

@@ -451,13 +451,60 @@ if __name__ == "__main__":
 
 
     # Open data and run genetic algorithm
+    data_dict = open_file('data\\toy_data2.txt')
+
+    selections = ['Rank']
+    crossovers = ['Uniform']
+
+    for s in selections:
+        for c in crossovers:
+            best_chromosomes = []
+            best_scores = []
+            iterations = []
+            for i in range(50):
+                GA = GeneticAlgorithm(data_dict, s, c, 0.05, 1000)
+                GA.start()
+                
+                best = GA.best_chromosome
+                best_chromosomes.append(best)
+                best_scores.append(GA.score_chrsomosome(best, 0, 'N'))
+                iterations.append(GA.best_iter)
+
+                if i == 49:
+                    GA.plot(best_chromosomes[best_scores.index(min(best_scores))], s, c, 'medium', (round(sum(iterations)/len(iterations),3), round(min(best_scores),3)))
+
+
+
+    # Open data and run genetic algorithm
+    data_dict = open_file('data\\large1.txt')
+
+    selections = ['Tournament']
+    crossovers = ['Double_Point']
+
+    for s in selections:
+        for c in crossovers:
+            best_chromosomes = []
+            best_scores = []
+            iterations = []
+            for i in range(10):
+                GA = GeneticAlgorithm(data_dict, s, c, 0.05, 1000)
+                GA.start()
+                
+                best = GA.best_chromosome
+                best_chromosomes.append(best)
+                best_scores.append(GA.score_chrsomosome(best, 0, 'N'))
+                iterations.append(GA.best_iter)
+
+                if i == 9:
+                    GA.plot(best_chromosomes[best_scores.index(min(best_scores))], s, c, 'large1', (round(sum(iterations)/len(iterations),3), round(min(best_scores),3)))
+
+
+
+    # Open data and run genetic algorithm
     data_dict = open_file('data\\large2.txt')
 
-    # Large dataset #2
-    log_file = open('results\\large_data2_results.txt', 'w')
-    
-    selections = ['Roulette', 'Tournament', 'Rank']
-    crossovers = ['Single_Point', 'Double_Point', 'Uniform']
+    selections = ['Rank']
+    crossovers = ['Uniform']
 
     for s in selections:
         for c in crossovers:
@@ -475,8 +522,3 @@ if __name__ == "__main__":
 
                 if i == 9:
                     GA.plot(best_chromosomes[best_scores.index(min(best_scores))], s, c, 'large2', (round(sum(iterations)/len(iterations),3), round(min(best_scores),3)))
-
-            out_string = s+', '+c+' -- Best Score: '+str(round(min(best_scores),3))+', Avg Score: '+str(round(sum(best_scores)/len(best_scores),3))+', Avg Iterations: '+str(round(sum(iterations)/len(iterations),3))+'\n'
-            log_file.write(out_string)
-
-    log_file.close()
