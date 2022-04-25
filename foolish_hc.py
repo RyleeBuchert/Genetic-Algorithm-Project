@@ -1,11 +1,10 @@
-from foolish_hc import FoolishHillClimbing
 import matplotlib.pyplot as plt
 import numpy as np
 import random
 import copy
 
 
-class SimulatedAnnealing:
+class FoolishHillClimbing:
     # Constructor:
     #   - Data_Dict: file object from 'open_file' method
     #   - Iter: int for the number of iterations annealing runs for
@@ -50,8 +49,7 @@ class SimulatedAnnealing:
                 h_new_S = self.score(new_S, 'N')
 
                 # Simulated annealing condition statement
-                random_num = random.uniform(0, 1)
-                if (h_new_S < h_S) or (random_num < np.exp((h_S - h_new_S)/self.T)):
+                if h_new_S < h_S:
                     self.S = copy.deepcopy(new_S)
 
                     # Set aside best score
@@ -176,105 +174,5 @@ class SimulatedAnnealing:
                 center = val
                 plt.plot([point[0], center[0]], [point[1], center[1]], 'c')
             plt.title(f'Iterations: {score[0]}, Score: {score[1]}')
-            plt.savefig(f'graphs\\SA\\{size}_data.png')
+            plt.savefig(f'graphs\\Foolish\\{size}_data.png')
             plt.close()
-
-
-
-# Method to open file and get data
-#   - Returns dictionary of p, num_vertices, and coordinates
-def open_file(file_path):
-    with open(file_path, 'r') as file:
-        data_string = file.read().split('\n')
-
-    data_info = data_string[0].split(' ')
-    p = int(data_info[0])
-    num_vertices = int(data_info[1])
-
-    raw_data = [data_string[i].split(',') for i in range(1, len(data_string))]
-    data = [[float(item[0]), float(item[1])] for item in raw_data if item[0] != '']
-    # centroids = [data[i] for i in range(p)]
-    # data = data[p:]
-    return {'p': p, 'num_vertices': num_vertices, 'data': data}
-
-
-if __name__ == "__main__":
-    # # Open data and run simulated annealing
-    # data_dict = open_file('data\\toy_data4.txt')
-    # SA = SimulatedAnnealing(data_dict, 1000)
-    # SA.start()
-    # print(SA.S)
-    # SA.plot()
-
-
-    # Collect results for simulated annealing
-    sizes = ['large2']
-
-    for s in sizes:
-        if s == 'small':
-            data_dict = open_file('data\\toy_data.txt')
-        elif s == 'medium':
-            data_dict = open_file('data\\toy_data2.txt')
-        elif s == 'large1':
-            data_dict = open_file('data\\large1.txt')
-        elif s == 'large2':
-            data_dict = open_file('data\\large2.txt') 
-
-        log_file = open(f'results\\SA_{s}_data_results.txt', 'w')
-
-        best_solutions = []
-        best_scores = []
-        iterations = []
-        for i in range(10):
-            SA = SimulatedAnnealing(data_dict, 1000)
-            print('Iteration ' + str(i))
-            SA.start()
-
-            best_solutions.append(SA.S)
-            best_scores.append(SA.score(SA.S, 'N'))
-            iterations.append(SA.best_iter)
-
-            if i == 9:
-                SA.plot(best_solutions[best_scores.index(min(best_scores))], f'{s}', (round(sum(iterations)/len(iterations),3),round(min(best_scores),3)))
-
-        out_string = 'Simulated Annealing -- Best Score: '+str(round(min(best_scores),3))+', Avg Score: '+str(round(sum(best_scores)/len(best_scores),3))+', Avg Iterations: '+str(round(sum(iterations)/len(iterations),3))+'\n'
-        log_file.write(out_string)
-
-        log_file.close()
-
-
-
-    # Collect results for foolish hill climbing
-    sizes = ['small', 'medium', 'large1', 'large2']
-
-    for s in sizes:
-        if s == 'small':
-            data_dict = open_file('data\\toy_data.txt')
-        elif s == 'medium':
-            data_dict = open_file('data\\toy_data2.txt')
-        elif s == 'large1':
-            data_dict = open_file('data\\large1.txt')
-        elif s == 'large2':
-            data_dict = open_file('data\\large2.txt') 
-
-        log_file = open(f'results\\Foolish_{s}_data_results.txt', 'w')
-
-        best_solutions = []
-        best_scores = []
-        iterations = []
-        for i in range(10):
-            Foolish = FoolishHillClimbing(data_dict, 1000)
-            print('Iteration ' + str(i))
-            Foolish.start()
-
-            best_solutions.append(Foolish.S)
-            best_scores.append(Foolish.score(Foolish.S, 'N'))
-            iterations.append(Foolish.best_iter)
-
-            if i == 9:
-                Foolish.plot(best_solutions[best_scores.index(min(best_scores))], f'{s}', (round(sum(iterations)/len(iterations),3),round(min(best_scores),3)))
-
-        out_string = 'Foolish Hill Climbing -- Best Score: '+str(round(min(best_scores),3))+', Avg Score: '+str(round(sum(best_scores)/len(best_scores),3))+', Avg Iterations: '+str(round(sum(iterations)/len(iterations),3))+'\n'
-        log_file.write(out_string)
-
-        log_file.close()

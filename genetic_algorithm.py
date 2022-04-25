@@ -389,6 +389,7 @@ class GeneticAlgorithm:
             plt.plot([point[0], center[0]], [point[1], center[1]], 'c')
         plt.title(f'Iterations: {score[0]}, Score: {score[1]}')
         plt.savefig(f'graphs\\{size}\\SGA_{s}_{c}.png')
+        plt.close()
 
 
 # Method to open file and get data
