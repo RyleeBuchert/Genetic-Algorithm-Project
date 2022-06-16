@@ -1,0 +1,4 @@
+Foolish Hill Climbing -- Best Score: 19.495, Avg Score: 19.495, Avg Iterations: 379.2
+Foolish Hill Climbing -- Best Score: 34.594, Avg Score: 34.594, Avg Iterations: 1281.3
+Foolish Hill Climbing -- Best Score: 83.642, Avg Score: 83.642, Avg Iterations: 3783.7
+Foolish Hill Climbing -- Best Score: 154.626, Avg Score: 154.626, Avg Iterations: 5687.3

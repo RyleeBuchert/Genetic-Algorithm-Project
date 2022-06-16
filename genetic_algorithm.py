@@ -2,13 +2,14 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import random
+import copy
 
 
 class GeneticAlgorithm:
     # Constructor:
     #   - Data_Dict: file object from 'open_file' method
     #   - Selection: string either 'Rank', 'Tournament', or 'Roulette'
-    #   - Crossover: string either 'Single Point', 'Double Point, 'N-Point', or 'Uniform'
+    #   - Crossover: string either 'Single_Point', 'Double_Point, or 'Uniform'
     #   - Mutation Rate: float for the chance of a random mutation
     #   - Iter: int for the number of iterations GA should run for
     def __init__(self, data_dict, selection, crossover, mutation_rate, iter):
@@ -34,10 +35,14 @@ class GeneticAlgorithm:
 
     # Method to run genetic algorithm
     def start(self):
-        for i in range(self.num_iterations):
+        run = True
+        count = 0
+        same_count = 0
+        self.best_iter = None
+        self.best_score = None
+        while run:
             # Score each chromosome in the chromosome_df
             chromosome_scores = [self.score_chrsomosome(self.chromosome_df.iloc[[i]], i, 'N') for i in self.chromosome_df.index]
-            print(str(i+1) + ': ' + str(min(chromosome_scores)))
 
             # Elitism --- place two fittest chromosomes in next generation with no changes
             top_chromosomes = pd.DataFrame(np.zeros(shape=(2, self.num_vertices)), columns=self.vertices)
@@ -62,9 +67,34 @@ class GeneticAlgorithm:
             drop_indexes = random.sample(list(range(99)), 2)
             self.chromosome_df = pd.concat([top_chromosomes, pd.DataFrame(chromosome_pool, columns=self.vertices).drop(drop_indexes)])
             self.chromosome_df.reset_index(drop=True, inplace=True)
+
+            # Exit loop if reached max iterations
+            if count >= self.num_iterations:
+                run = False
+
+            # Exit loop if solution hasn't changed in 100 generations
+            if same_count >= 100:
+                run = False
+
+            # Update iteration for best score
+            if self.best_iter is None:
+                self.best_iter = copy.deepcopy(count)
+                self.best_score = min(chromosome_scores)
+                print(str(count+1) + ': ' + str(min(chromosome_scores)))
+            if min(chromosome_scores) < self.best_score:
+                self.best_iter = copy.deepcopy(count)
+                self.best_score = min(chromosome_scores)
+                print(str(count+1) + ': ' + str(min(chromosome_scores)))
+                same_count = 0
+            
+            print(same_count)
+
+            count += 1
+            same_count += 1
         
         # Plot graph and return chromosome df
         self.best_chromosome = self.chromosome_df.iloc[[chromosome_scores.index(min(chromosome_scores))]]
+        self.best_chromosome.reset_index(drop=True, inplace=True)
 
 
     # Score chromosome based on total distance from points to centers
@@ -188,9 +218,9 @@ class GeneticAlgorithm:
 
     # Wrapper method for crossovers
     def crossover(self, mech, parents):
-        if mech == "Single Point":
+        if mech == "Single_Point":
             return self.single_point_crossover(parents)
-        elif mech == "Double Point":
+        elif mech == "Double_Point":
             return self.double_point_crossover(parents)
         elif mech == "Uniform":
             return self.uniform_crossover(parents)
@@ -339,7 +369,7 @@ class GeneticAlgorithm:
 
 
     # Method to plot graph with connections
-    def plot(self, chromosome):
+    def plot(self, chromosome, s, c, size, score):
         # Get centers and assign points
         chromosome.reset_index(drop=True, inplace=True)
         assignments = self.score_chrsomosome(chromosome, 0, mode='P')
@@ -348,16 +378,18 @@ class GeneticAlgorithm:
         plt.xlim([0, 10])
         plt.ylim([0, 10])
         for val in assignments[0].values():
-            plt.plot(val[0], val[1], 'ro')
-        for val in assignments[1].values():
             plt.plot(val[0], val[1], 'bo')
+        for val in assignments[1].values():
+            plt.plot(val[0], val[1], 'ro')
 
         # Connect points to centroids and show graph
         for key, val in assignments[2].items():
             point = self.vertice_coords[key-1]
             center = val
             plt.plot([point[0], center[0]], [point[1], center[1]], 'c')
-        plt.show()
+        plt.title(f'Iterations: {score[0]}, Score: {score[1]}')
+        plt.savefig(f'graphs\\{size}\\SGA_{s}_{c}.png')
+        plt.close()
 
 
 # Method to open file and get data
@@ -379,8 +411,39 @@ def open_file(file_path):
 
 if __name__ == "__main__":
     # Open data and run genetic algorithm
-    data_dict = open_file('data\\toy_data4.txt')
-    GA = GeneticAlgorithm(data_dict, 'Roulette', 'Single Point', 0.05, 150)
+    data_dict = open_file('data\\toy_data2.txt')
+
+    GA = GeneticAlgorithm(data_dict, 'Rank', 'Uniform', 0.05, 100)
     GA.start()
     print(GA.best_chromosome)
-    GA.plot(GA.best_chromosome)
+    GA.plot(GA.best_chromosome, 'Rank', 'Uniform', 'Small')
+
+
+    # # Log results and get graphs
+    # data_dict = open_file('data\\large1.txt')
+    # log_file = open('results\\large_data_results.txt', 'w')
+    
+    # selections = ['Roulette', 'Tournament', 'Rank']
+    # crossovers = ['Single_Point', 'Double_Point', 'Uniform']
+
+    # for s in selections:
+    #     for c in crossovers:
+    #         best_chromosomes = []
+    #         best_scores = []
+    #         iterations = []
+    #         for i in range(10):
+    #             GA = GeneticAlgorithm(data_dict, s, c, 0.05, 1000)
+    #             GA.start()
+                
+    #             best = GA.best_chromosome
+    #             best_chromosomes.append(best)
+    #             best_scores.append(GA.score_chrsomosome(best, 0, 'N'))
+    #             iterations.append(GA.best_iter)
+
+    #             if i == 9:
+    #                 GA.plot(best_chromosomes[best_scores.index(min(best_scores))], s, c, 'large1', (round(sum(iterations)/len(iterations),3), round(min(best_scores),3)))
+
+    #         out_string = s+', '+c+' -- Best Score: '+str(round(min(best_scores),3))+', Avg Score: '+str(round(sum(best_scores)/len(best_scores),3))+', Avg Iterations: '+str(round(sum(iterations)/len(iterations),3))+'\n'
+    #         log_file.write(out_string)
+
+    # log_file.close()

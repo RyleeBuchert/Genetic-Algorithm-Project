@@ -1,0 +1,4 @@
+Simulated Annealing -- Best Score: 19.495, Avg Score: 23.218, Avg Iterations: 39433.62
+Simulated Annealing -- Best Score: 35.962, Avg Score: 39.721, Avg Iterations: 343694.86
+Simulated Annealing -- Best Score: 86.559, Avg Score: 90.704, Avg Iterations: 358622.5
+Simulated Annealing -- Best Score: 157.136, Avg Score: 161.241, Avg Iterations: 362525.3
